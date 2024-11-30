@@ -108,3 +108,4 @@ Usage
 1. Upload an image of food ingredients through the web interface.
 2. The system detects the ingredients and displays a list.
 3. View suggested recipes scraped from websites like Food.com.
+
