@@ -1,0 +1,13 @@
+torch
+torchvision
+scikit-learn
+matplotlib
+flask
+flask-cors
+ultralytics
+beautifulsoup4
+requests
+pillow
+
+
+

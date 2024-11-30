@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Kaylyn">
+    <title>ReciPIC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <form action="/home" method="POST" enctype="multipart/form-data">
+            <div class="drag-area">
+                <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <header>Drag & Drop to Upload File</header>
+                <span>OR</span>
+                <button id="browseButton" type="button">Browse File</button>
+                <input type="file" id="fileInput" name="file" hidden required>
+            </div>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    <div id="ingredientsSection">
+        {% if ingredients %}
+            <h2>Detected Ingredients:</h2>
+            <ul>
+                {% for ingredient in ingredients %}
+                    <li>{{ ingredient }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div id="urlList">
+        {% if recipe_urls %}
+            <h2>Recipe Suggestions:</h2>
+            <ul>
+                {% for url in recipe_urls %}
+                    <li><a href="{{ url }}" target="_blank">{{ url }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No recipes found. Try uploading an image with identifiable ingredients.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Trigger file input click when the browse button is clicked
+        document.getElementById('browseButton').addEventListener('click', function() {
+            document.getElementById('fileInput').click(); // Trigger file input
+        });
+    </script>
+</body>
+</html>
