@@ -93,3 +93,9 @@ To crop and label data:
 3. Processed images will be saved in ReciPIC/data/processed_img1 folder.
 4. Manually correct labels and put final images in processed_img (ReciPIC/data/processed_img).
 
+
+Usage
+1. Upload an image of food ingredients through the web interface.
+2. The system detects the ingredients and displays a list.
+3. View suggested recipes scraped from websites like Food.com.
+
