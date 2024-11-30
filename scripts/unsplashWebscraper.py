@@ -40,6 +40,6 @@ def fetch_food_images(query, save_dir, num_images=1):
 
 # Example usage
 if __name__ == "__main__":
-    food_item = input('Enter ingredient you want to web scrape')  # Change this to the food item you want
+    food_item = input('Enter ingredient you want to web scrape: ')  # Change this to the food item you want
     save_directory = os.path.join(os.getcwd(), 'data', 'unprocessed_img') 
     fetch_food_images(food_item, save_directory)

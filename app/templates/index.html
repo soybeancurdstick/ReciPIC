@@ -12,12 +12,15 @@
 <body>
     <div class="container">
         <form action="/home" method="POST" enctype="multipart/form-data">
-            <div class="drag-area">
+            <div class="drag-area" id="dropzone">
                 <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
                 <header>Drag & Drop to Upload File</header>
                 <span>OR</span>
                 <button id="browseButton" type="button">Browse File</button>
                 <input type="file" id="fileInput" name="file" hidden required>
+                <div id="fileName">
+
+                </div>
             </div>
             <button type="submit">Upload</button>
         </form>
@@ -52,6 +55,29 @@
         document.getElementById('browseButton').addEventListener('click', function() {
             document.getElementById('fileInput').click(); // Trigger file input
         });
+ 
+        document.getElementById('fileInput').addEventListener('change', function() {
+            if (this.files.length > 0) {
+                // Get the name of the selected file
+                const fileName = 'Selected file: ' + this.files[0].name;
+                document.getElementById("fileName").textContent = fileName;
+            } else {
+                document.getElementById("fileName").textContent = 'No file selected';
+            }
+        });
+        
+        document.getElementById('dropzone').addEventListener('drop', (event) => {
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            document.getElementById('fileInput').files = files;
+            document.getElementById("fileName").textContent = 'Selected file: ' + files[0].name;
+        })
+        // Prevent the default dragover behavior to allow dropping
+        document.getElementById('dropzone').addEventListener('dragover', (event) => {
+            event.preventDefault();
+        });
+
+
     </script>
 </body>
 </html>

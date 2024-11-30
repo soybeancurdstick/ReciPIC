@@ -2,12 +2,16 @@ torch
 torchvision
 scikit-learn
 matplotlib
-flask
+Flask
 flask-cors
 ultralytics
 beautifulsoup4
 requests
-pillow
-
+Pillow
+selenium
+webdriver-manager
+numpy
+opencv-python
+splitfolders
 
 

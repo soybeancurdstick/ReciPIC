@@ -500,7 +500,7 @@ params = [
 optimizer = optim.Adam(params, lr = FOUND_LR)
 
 
-EPOCHS = int(input('Enter epochs') )
+EPOCHS = int(input('Enter epochs: ') )
 STEPS_PER_EPOCH = len(train_iterator)
 TOTAL_STEPS = EPOCHS * STEPS_PER_EPOCH
 
