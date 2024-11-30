@@ -94,6 +94,16 @@ To crop and label data:
 4. Manually correct labels and put final images in processed_img (ReciPIC/data/processed_img).
 
 
+To train and test model:
+1. Change directory to Pipeline1
+	cd Pipeline1
+2. Run trainTest.
+	python3 trainTest.py
+3. Enter number of epochs (example below uses 30):
+	Enter epochs: 30
+
+
+
 Usage
 1. Upload an image of food ingredients through the web interface.
 2. The system detects the ingredients and displays a list.
