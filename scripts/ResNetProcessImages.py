@@ -8,20 +8,23 @@ import cv2
 
 print("ResNet for classification")
 
-# 1. Load YOLOv8 model for object detection
-yolo_model_path = os.path.join(os.getcwd(), '..', 'models', 'yolov8n.pt')  # Corrected path to yolov8n.pt
+# Get the current directory where the script is located
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Dynamically set paths relative to the current directory (no hardcoding)
+yolo_model_path = os.path.join(current_dir, '..', 'models', 'yolov8n.pt')  # Path to YOLOv8 model
 yolo_model = YOLO(yolo_model_path)
 
-# 2. Load a pre-trained ResNet model for image classification
+# Load a pre-trained ResNet model for image classification
 resnet_model = models.resnet50(pretrained=True)
 resnet_model.eval()
 
-# 3. Load ImageNet class names for ResNet classification
-imagenet_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'ImageNet1000Classes.txt')   # Corrected path for ImageNet classes
+# Load ImageNet class names for ResNet classification
+imagenet_path = os.path.join(current_dir, '..', 'ImageNet1000Classes.txt')
 with open(imagenet_path) as classfile:
     ImageNetClasses = [line.strip() for line in classfile.readlines()]
 
-# 4. Define preprocessing transformations for ResNet
+# Define preprocessing transformations for ResNet
 preprocess = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -31,8 +34,7 @@ preprocess = transforms.Compose([
 
 # Function to classify the cropped image using ResNet
 def classify_image(cropped_image):
-    # Convert the image to RGB (in case it's not)
-    cropped_image = cropped_image.convert('RGB')
+    cropped_image = cropped_image.convert('RGB')  # Convert to RGB if not already
 
     # Preprocess the cropped image
     input_tensor = preprocess(cropped_image)
@@ -42,7 +44,7 @@ def classify_image(cropped_image):
     with torch.no_grad():
         output = resnet_model(input_batch)
 
-    # Get the predicted class index and the confidence score
+    # Get the predicted class index and confidence score
     _, index = torch.max(output, 1)
     percentage = torch.nn.functional.softmax(output, dim=1)[0] * 100
     predicted_class = ImageNetClasses[index[0]]
@@ -55,7 +57,7 @@ def classify_image(cropped_image):
 def is_image_file(filename):
     return filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))
 
-# 5. Crop, classify, and save detected objects
+# Function to crop, save, and classify detected objects
 def crop_save_and_classify(image_path, detections, output_dir):
     image = Image.open(image_path)
 
@@ -91,10 +93,14 @@ def crop_save_and_classify(image_path, detections, output_dir):
         print(f"Detected '{label}' classified as '{predicted_class}' with {confidence:.2f}% confidence.")
 
 # 6. Main processing loop for the directory of images
-input_dir = os.path.join(os.getcwd(), 'data', 'unprocessed_img')  # Corrected path to 'data/unprocessed_img'
-output_dir = os.path.join(os.getcwd(), 'data', 'processed_img1')  # Corrected path to 'data/processed_img1'
+# Define the input and output directories dynamically based on the current working directory
+input_dir = os.path.join(current_dir, '..', 'data', 'unprocessed_img')  # Input directory for unprocessed images
+output_dir = os.path.join(current_dir, '..', 'data', 'processed_img1')  # Output directory for processed images
+
+# Ensure the output directory exists
 os.makedirs(output_dir, exist_ok=True)
 
+# Process the images in the input directory
 for image_filename in os.listdir(input_dir):
     if is_image_file(image_filename):  # Only process image files
         image_path = os.path.join(input_dir, image_filename)

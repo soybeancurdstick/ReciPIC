@@ -17,7 +17,7 @@ def download_image(image_url, save_dir, img_name):
         print(f"Error downloading {img_name}: {e}")
 
 # Function to fetch images from Unsplash API
-def fetch_food_images(query, save_dir, num_images=1):
+def fetch_food_images(query, save_dir, num_images):
     # Set your API key here
     API_KEY = 'jKcsYL30VujCMkPO8fxVAlbIPi_L0q3N7UcSJSgBbpU'  # Replace with your Unsplash Access Key
     headers = {
@@ -40,6 +40,12 @@ def fetch_food_images(query, save_dir, num_images=1):
 
 # Example usage
 if __name__ == "__main__":
+    reciPIC_dir = reciPIC_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'ReciPIC'))
+
+
+    print("dir : " + reciPIC_dir)
+    
     food_item = input('Enter ingredient you want to web scrape: ')  # Change this to the food item you want
-    save_directory = os.path.join(os.getcwd(), 'data', 'unprocessed_img') 
-    fetch_food_images(food_item, save_directory)
+    save_directory = os.path.join(reciPIC_dir, 'data', 'unprocessed_img') 
+    num_img = int(input('Enter number of images you want to scrape: '))
+    fetch_food_images(food_item, save_directory, num_img)

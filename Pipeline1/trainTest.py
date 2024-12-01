@@ -33,11 +33,18 @@ torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 torch.backends.cudnn.deterministic = True
 
+# Get the absolute path of the current directory (the root of the project)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+print(f"The current directory is: {current_dir}\n\n")
+
 # Directories and device setup
-ROOT = '/Users/kaylynl/Desktop/ReciPIC/data'
-data_dir = os.path.join(ROOT, 'data3')
-train_dir = os.path.join(data_dir, 'train')
-test_dir = os.path.join(data_dir, 'test')
+reciPIC_dir = os.path.join(current_dir, '..')
+data_dir = os.path.join(reciPIC_dir, 'data') 
+data3_dir = os.path.join(data_dir, 'data3')
+train_dir = os.path.join(data3_dir, 'train')
+test_dir = os.path.join(data3_dir, 'test')
+models_dir = os.path.join(reciPIC_dir, 'models')
+os.makedirs(models_dir, exist_ok=True)
 
 
 ######SPLIT DATA INTO TEST AND TRAIN
@@ -45,8 +52,8 @@ test_dir = os.path.join(data_dir, 'test')
 TRAIN_RATIO = 0.8
 
 # Specify the root directory where your images are stored
-src_dir = './data/processed_img'
-destination_dir = 'data3'
+src_dir = os.path.join(data_dir, 'processed_img')  # Navigate up one level and into data/processed_img
+destination_dir = os.path.join(data_dir, 'data3')
 train_dir = os.path.join(destination_dir, 'train')
 test_dir = os.path.join(destination_dir, 'test')
 
@@ -235,7 +242,7 @@ resnet50_config = ResNetConfig(block = Bottleneck,
 pretrained_model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
 
 #iterate through folder to get test_data.class
-folder_path = './data/processed_img'
+folder_path = src_dir
 test_data.classes = [label for label in os.listdir(folder_path)if os.path.isdir(os.path.join(folder_path, label))]
 
 #create new linear layer since I don't have 1000 classes
@@ -271,7 +278,7 @@ class LRFinder:
         self.criterion = criterion
         self.device = device
         
-        torch.save(model.state_dict(), 'models/init_params.pt')
+        torch.save(model.state_dict(),os.path.join(models_dir, 'init_params.pt'))
 
     def range_test(self, iterator, end_lr = 10, num_iter = 100, 
                    smooth_f = 0.05, diverge_th = 5):
@@ -306,7 +313,7 @@ class LRFinder:
                 break
                        
         #reset model to initial parameters
-        model.load_state_dict(torch.load('models/init_params.pt', weights_only=True))
+        model.load_state_dict(torch.load(os.path.join(models_dir, 'init_params.pt'), weights_only=True))
                     
         return lrs, losses
 
@@ -359,101 +366,6 @@ class IteratorWrapper:
     def get_batch(self):
         return next(self)
     
-class LRFinder:
-    def __init__(self, model, optimizer, criterion, device):
-        
-        self.optimizer = optimizer
-        self.model = model
-        self.criterion = criterion
-        self.device = device
-        
-        torch.save(model.state_dict(), 'models/init_params.pt')
-
-    def range_test(self, iterator, end_lr = 10, num_iter = 100, 
-                   smooth_f = 0.05, diverge_th = 5):
-        
-        lrs = []
-        losses = []
-        best_loss = float('inf')
-
-        lr_scheduler = ExponentialLR(self.optimizer, end_lr, num_iter)
-        
-        iterator = IteratorWrapper(iterator)
-        
-        for iteration in range(num_iter):
-
-            loss = self._train_batch(iterator)
-
-            #update lr
-            lr_scheduler.step()
-            
-            lrs.append(lr_scheduler.get_lr()[0])
-
-            if iteration > 0:
-                loss = smooth_f * loss + (1 - smooth_f) * losses[-1]
-                
-            if loss < best_loss:
-                best_loss = loss
-
-            losses.append(loss)
-
-            if loss > diverge_th * best_loss:
-                print("Stopping early, the loss has diverged")
-                break
-                       
-        #reset model to initial parameters
-        model.load_state_dict(torch.load('models/init_params.pt'))
-                    
-        return lrs, losses
-
-    def _train_batch(self, iterator):
-        
-        self.model.train()
-        
-        self.optimizer.zero_grad()
-        
-        x, y = iterator.get_batch()
-        
-        x = x.to(self.device)
-        y = y.to(self.device)
-        
-        y_pred, _ = self.model(x)
-                
-        loss = self.criterion(y_pred, y)
-        
-        loss.backward()
-        
-        self.optimizer.step()
-        
-        return loss.item()
-
-class ExponentialLR(_LRScheduler):
-    def __init__(self, optimizer, end_lr, num_iter, last_epoch=-1):
-        self.end_lr = end_lr
-        self.num_iter = num_iter
-        super(ExponentialLR, self).__init__(optimizer, last_epoch)
-
-    def get_lr(self):
-        curr_iter = self.last_epoch + 1
-        r = curr_iter / self.num_iter
-        return [base_lr * (self.end_lr / base_lr) ** r for base_lr in self.base_lrs]
-    
-class IteratorWrapper:
-    def __init__(self, iterator):
-        self.iterator = iterator
-        self._iterator = iter(iterator)
-
-    def __next__(self):
-        try:
-            inputs, labels = next(self._iterator)
-        except StopIteration:
-            self._iterator = iter(self.iterator)
-            inputs, labels, *_ = next(self._iterator)
-
-        return inputs, labels
-
-    def get_batch(self):
-        return next(self)
 
 END_LR = 10
 NUM_ITER = 100
@@ -610,7 +522,7 @@ for epoch in range(EPOCHS):
         
     if valid_loss < best_valid_loss:
         best_valid_loss = valid_loss
-        torch.save(model.state_dict(), 'models/tut5-model.pt')
+        torch.save(model.state_dict(), os.path.join(models_dir, 'tut5-model.pt'))
 
     end_time = time.monotonic()
 
@@ -622,7 +534,7 @@ for epoch in range(EPOCHS):
     print(f'\tValid Loss: {valid_loss:.3f} | Valid Acc @1: {valid_acc_1*100:6.2f}% | ' \
           f'Valid Acc @5: {valid_acc_5*100:6.2f}%')
     
-model.load_state_dict(torch.load('models/tut5-model.pt'))
+model.load_state_dict(torch.load(os.path.join(models_dir, 'tut5-model.pt')))
 
 test_loss, test_acc_1, test_acc_5 = evaluate(model, test_iterator, criterion, device)
 
